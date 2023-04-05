@@ -34,11 +34,11 @@ from googleapiclient.http import MediaFileUpload
 
 
 ```python
-conn = snowflake.connector.connect(user='RICARDO.CAMPOS@RAPPI.COM', 
-                                   authenticator='externalbrowser', 
-                                   account='hg51401', 
-                                   warehouse="TURBO",
-                                   database="FIVETRAN")
+conn = snowflake.connector.connect(user='', 
+                                   authenticator='', 
+                                   account='', 
+                                   warehouse="",
+                                   database="")
 ```
 
 ## Descarga WL
@@ -140,7 +140,7 @@ df_wl.head(2)
 
 
 ```python
-url='http://redash.rappi.com/api/queries/63512/results.csv?api_key=hJVSBzBqWftA2HD6VNEIMpkHaex32b4aC3rSLQzG'
+url=''
 urlData = requests.get(url).content
 inventario = pd.read_csv(io.StringIO(urlData.decode('utf-8')))
 ```
@@ -2411,126 +2411,3 @@ with pd.ExcelWriter(f"Informe_SWA_{fecha_file}.xlsx", engine='openpyxl', mode='a
    resumen_swa_tienda.to_excel(writer, sheet_name='SWA_tienda', index=True)
 ```
 
-
-```python
-# Replace with the path to your service account JSON file
-creds = Credentials.from_service_account_file('importdrivetojupyter-b583de2e85a5.json')
-
-# Replace with the name of the folder where you want to upload the file
-folder_name = 'Alertas SWA'
-
-# Replace with the path to the Excel file you want to upload
-file_path = f"Informe_SWA_{fecha_file}.xlsx"
-
-# Create a Drive API client
-drive_service = build('drive', 'v3', credentials=creds)
-
-# Find the ID of the target folder
-query = "mimeType='application/vnd.google-apps.folder' and trashed=false and name='{}'".format(folder_name)
-response = drive_service.files().list(q=query, fields='files(id)').execute()
-folder_id = response.get('files', [])[0].get('id')
-
-# Upload the Excel file to Drive
-file_metadata = {'name': f"Informe_SWA_{fecha_file}.xlsx", 'parents': [folder_id]}
-media = MediaFileUpload(file_path, resumable=True)
-file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-
-# Give people edit access to the file
-file_id = file.get('id')
-
-# new_permissions = [{'type': 'user','role': 'writer','emailAddress': 'ricardo.campos@rappi.com'}]
-new_permissions = [{'type': 'user','role': 'writer','emailAddress': 'ricardo.campos@rappi.com'},    
-                  {'type': 'user', 'role': 'writer','emailAddress': 'marcel.kempe@rappi.com'},
-                  {'type': 'user', 'role': 'writer','emailAddress': 'julian.ariza@rappi.com'},
-                  {'type': 'user', 'role': 'writer','emailAddress': 'natalia.unda@rappi.com'},
-                  {'type': 'user', 'role': 'writer','emailAddress': 'roland.rojas@rappi.com'},
-                  {'type': 'user', 'role': 'writer','emailAddress': 'antonio.fernandez@rappi.com'},
-                  {'type': 'user', 'role': 'writer','emailAddress': 'victor.garcia@rappi.com'},
-                  {'type': 'user', 'role': 'writer','emailAddress': 'miguel.barbosa@rappi.com'},
-                  {'type': 'user', 'role': 'writer','emailAddress': 'mariangela.uribe@rappi.com'},
-                  {'type': 'user', 'role': 'writer','emailAddress': 'maria.mejia@rappi.com'}]
-
-for permission in new_permissions:
-    drive_service.permissions().create(
-        fileId=file_id,
-        body={
-            'kind': 'drive#permission',
-            'type': 'user',
-            'role': permission['role'],
-            'emailAddress': permission['emailAddress']
-        },
-        sendNotificationEmail=True  # optional
-    ).execute()
-
-# Print the link to the file
-link = "https://drive.google.com/file/d/{}/view?usp=sharing".format(file_id)
-print("File uploaded to Drive and shared with the specified email addresses:")
-print(link)
-
-```
-
-    File uploaded to Drive and shared with the specified email addresses:
-    https://drive.google.com/file/d/1l8hKW3Axhmn-xh3rS2HkZvXWpKIpzKDl/view?usp=sharing
-    
-
-# ENVÍO DE MERCANCÍA
-
-
-```python
-# import smtplib, getpass, os
-# from email.mime.multipart import MIMEMultipart
-# from email.mime.text import MIMEText
-# from email.mime.base import MIMEBase
-# from datetime import datetime
-# from email import encoders
-# import zipfile
-
-# user = """ricardo.campos@rappi.com"""
-# password = """aauoyrfxgjosxcoy"""
-
-# fecha = datetime.today().strftime('%Y-%m-%d')
-
-# # Replace with the link to the folder containing the file
-# link_adjunto = link
-# # Ajustes del mail
-# remitente = """Rappi Turbo Supply"""
-# destinatario = ['ricardo.campos@rappi.com']
-# asunto = f"""Alertas e informe SWA {fecha}"""
-# mensaje = f"""Hola, <br><br> Adjunto encontrarán el informe de agotados, SWA y alertas.<br><br> ¡Gracias! {link}"""
-
-# # Host y puerto SMTP de Gmail
-# server = smtplib.SMTP('smtp.gmail.com', 587)
-
-# # Protocolo de cifrado de datos
-# server.starttls()
-
-# # Credenciales
-# server.login(user, password)
-
-# # Muestra la depuración de la operación de envío 1=true
-# server.set_debuglevel(1)
-
-# msg = MIMEMultipart()
-# msg['Subject'] = asunto
-# msg['From'] = remitente
-# msg['To'] = ", ".join(destinatario)
-
-# mensaje = MIMEText(mensaje, 'html')
-# msg.attach(mensaje)
-
-# part.set_payload(file_data)
-# encoders.encode_base64(part)
-# part.add_header('Content-Disposition', f'attachment; filename="{compressed_file}"')
-# msg.attach(part)
-
-# # Enviar mail
-# server.sendmail(remitente, destinatario, msg.as_string())
-
-# # Cerrar la conexión
-# server.quit()
-```
-
-
-```python
-conn.close()
-```
